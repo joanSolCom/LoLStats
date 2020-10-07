@@ -6,8 +6,9 @@ apiKey = "RGAPI-99f28659-6241-4c83-a7f3-6ac27785dee4"
 region = "EUW1"
 name = "TeslaTronca"
 iLol = LolWatcher(api_key=apiKey)
-
-
+stats = iLol.league.by_summoner(region, "MN6IW9qCcAwpzfS04cDDsDSOscR8mY2ZhRGkhvqSqgiK3ZHM")
+print(stats)
+exit()
 '''
 Basic Stats
 stats = iLol.league.by_summoner(region, idAccount)
@@ -31,12 +32,17 @@ def getMatchHistoryByName(iLol, name):
     return encriptedId, matchHistory
 
 encriptedId , mh = getMatchHistoryByName(iLol, name)
-print(encriptedId)
+
 #with open('my_match_history.json', 'w') as outfile:
 #    json.dump(mh, outfile)
 
 for match in mh:
+    if match["queue"] != 420:
+        continue
+
     idx = match["gameId"]
     gameInfo = iLol.match.by_id(region=region,match_id=idx)
-    #pprint(gameInfo)
+    #data = json.loads(gameInfo)
+    with open("rankedGameInfo.json","w") as json_file:
+        json.dump(gameInfo, json_file)
     break

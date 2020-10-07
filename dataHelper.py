@@ -28,7 +28,7 @@ class DataHelper:
             dictItems = raw["data"] 
             for name, dictInfo in dictItems.items():
                 iI = Item(name, dictInfo, self.basePath, self.patch)
-                self.itemsById[name] = iI
+                self.itemsById[str(name)] = iI
 
     def loadChampInfo(self):
         self.champsById = {}
@@ -42,6 +42,9 @@ class DataHelper:
             
     def getChampInfoById(self, idx):
         return self.champsById.get(str(idx))
+    
+    def getItemInfoById(self, idx):
+        return self.itemsById.get(str(idx))
 
 class Item:
     def __init__(self, idx, dictInfo, pathDT, patch):
@@ -51,7 +54,9 @@ class Item:
         self.idx = idx
         self.description = dictInfo["description"]
         self.plaintext = dictInfo["plaintext"]
-        self.transformsIntoList = dictInfo["into"]
+        self.transformsIntoList = []
+        if "into" in dictInfo:
+            self.transformsIntoList = dictInfo["into"]
         self.goldInfoDict = dictInfo["gold"]
         self.tagList = dictInfo["tags"]
         self.mapDict = dictInfo["maps"]

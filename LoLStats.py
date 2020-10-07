@@ -7,9 +7,13 @@ from pprint import pprint
 
 class LolStats:
 
-    def __init__(self):
-        with open("my_match_history.json") as json_file:
-            self.raw = json.load(json_file)
+    def __init__(self, matchHistoryJSON=None):
+        if not matchHistoryJSON:
+            with open("my_match_history.json") as json_file:
+                self.raw = json.load(json_file)
+        else:
+            self.raw = json.loads(matchHistoryJSON)
+
         self.iD = DataHelper()
 
     def dateTimeAnalysis(self):
@@ -63,25 +67,34 @@ class DataGatherer:
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
 
+    def getAccountRank(self, region, summonerId):
+        info = self.iLol.league.by_summoner(region, summonerId)
+        rank = None
+        winrate = None
+        if len(info) > 0:
+            info = info[0]
+            rank = info["tier"] + "_" + info["rank"]
+            winrate = info["wins"] / (info["wins"] + info["losses"])
+
+        return rank, winrate
+
     def getMatchHistoryByName(self, name="TeslaTronca", region="EUW1"):
         me = self.iLol.summoner.by_name(region, name)
         encriptedId = me["accountId"]
-        match_obj = self.iLol.match.matchlist_by_account(region, encriptedId)
+        return self.getMatchHistoryByAccountId(encriptedId, region)
+
+    def getMatchHistoryByAccountId(self, accountId, region):
+        match_obj = self.iLol.match.matchlist_by_account(region, accountId)
         matchHistory = []
         while len(match_obj["matches"]) > 0:
             endIndex = match_obj["endIndex"]
-            match_obj = self.iLol.match.matchlist_by_account(region, encriptedId, begin_index=endIndex)
+            match_obj = self.iLol.match.matchlist_by_account(region, accountId, begin_index=endIndex)
             for matchInfo in match_obj["matches"]:
                 matchHistory.append(matchInfo)
         
         return matchHistory
 
     
-
-class Game:
-    def __init__(self):
-        pass
-
 if __name__ == "__main__":
     iS = LolStats()
     #iS.dateTimeAnalysis()
