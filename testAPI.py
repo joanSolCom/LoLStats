@@ -2,12 +2,14 @@ from riotwatcher import LolWatcher
 import json
 from pprint import pprint
 
-apiKey = "RGAPI-99f28659-6241-4c83-a7f3-6ac27785dee4"
+apiKey = ""
 region = "EUW1"
 name = "TeslaTronca"
 iLol = LolWatcher(api_key=apiKey)
 stats = iLol.league.by_summoner(region, "MN6IW9qCcAwpzfS04cDDsDSOscR8mY2ZhRGkhvqSqgiK3ZHM")
-print(stats)
+with open('playerInfo.json.json', 'w') as outfile:
+    json.dump(stats, outfile)
+#print(stats)
 exit()
 '''
 Basic Stats
@@ -31,11 +33,15 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
-encriptedId , mh = getMatchHistoryByName(iLol, name)
+#encriptedId , mh = getMatchHistoryByName(iLol, name)
 
 #with open('my_match_history.json', 'w') as outfile:
 #    json.dump(mh, outfile)
 
+print(iLol.league.masters_by_queue(region, "RANKED_SOLO_5x5"))
+
+
+exit()
 for match in mh:
     if match["queue"] != 420:
         continue

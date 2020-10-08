@@ -63,9 +63,38 @@ class LolStats:
 
 class DataGatherer:
 
-    def __init__(self, apiKey = "RGAPI-99f28659-6241-4c83-a7f3-6ac27785dee4"):
+    def __init__(self, apiKey = ""):
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
+
+    def getUsersPerLeague(self, region, tier, division="I", page=1):
+        userList = []
+        entries = []
+        if tier == "MASTERS":
+            entries = self.iLol.league.masters_by_queue(region, "RANKED_SOLO_5x5")
+            
+            for e in entries["entries"]:
+                e["region"] = region
+            userList = entries["entries"]
+
+        elif tier == "GRANDMASTER":
+            entries = self.iLol.league.grandmaster_by_queue(region, "RANKED_SOLO_5x5")
+            for e in entries["entries"]:
+                e["region"] = region
+            userList = entries["entries"]
+
+        elif tier == "CHALLENGER":
+            entries = self.iLol.league.challenger_by_queue(region, "RANKED_SOLO_5x5")
+            for e in entries["entries"]:
+                e["region"] = region
+            userList = entries["entries"]
+        else:
+            entries = self.iLol.league.entries(region, "RANKED_SOLO_5x5", tier,division, page)
+            for userInfo in entries:
+                userInfo["region"] = region
+                userList.append(userInfo)
+
+        return userList
 
     def getAccountRank(self, region, summonerId):
         info = self.iLol.league.by_summoner(region, summonerId)
@@ -77,6 +106,17 @@ class DataGatherer:
             winrate = info["wins"] / (info["wins"] + info["losses"])
 
         return rank, winrate
+
+    def getMatchesInfo(self, mh):
+        gameInfoList = []
+        for m in mh:
+            gameInfo = self.getMatchByGameId(m["platformId"], m["gameId"])
+            gameInfoList.append(gameInfo)
+        return gameInfoList
+
+    def getMatchByGameId(self, region, gameId):
+        gameInfo = self.iLol.match.by_id(region=region,match_id=gameId)
+        return gameInfo
 
     def getMatchHistoryByName(self, name="TeslaTronca", region="EUW1"):
         me = self.iLol.summoner.by_name(region, name)
