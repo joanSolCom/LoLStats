@@ -66,6 +66,12 @@ class DataGatherer:
     def __init__(self, apiKey = ""):
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
+    
+    def getAccountInfo(self, region, name):
+        me = self.iLol.summoner.by_name(region, name)
+        idAccount = me["id"]
+        info = self.iLol.league.by_summoner(region, idAccount)
+        return info
 
     def getUsersPerLeague(self, region, tier, division="I", page=1):
         userList = []
@@ -124,13 +130,14 @@ class DataGatherer:
         return self.getMatchHistoryByAccountId(encriptedId, region)
 
     def getMatchHistoryByAccountId(self, accountId, region):
-        match_obj = self.iLol.match.matchlist_by_account(region, accountId)
+        match_obj = self.iLol.match.matchlist_by_account(region, accountId,queue=420)
         matchHistory = []
         while len(match_obj["matches"]) > 0:
-            endIndex = match_obj["endIndex"]
-            match_obj = self.iLol.match.matchlist_by_account(region, accountId, begin_index=endIndex)
             for matchInfo in match_obj["matches"]:
                 matchHistory.append(matchInfo)
+
+            endIndex = match_obj["endIndex"]
+            match_obj = self.iLol.match.matchlist_by_account(region, accountId, begin_index=endIndex,queue=420)
         
         return matchHistory
 

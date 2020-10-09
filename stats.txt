@@ -1,0 +1,44 @@
+19553 matches stored
+2,07M users with their ranks
+
+85637 instances to train
+
+Class distribution. Only tier
+{
+    'SILVER': 16512, 
+    'IRON': 4963, 
+    'GOLD': 16478, 
+    'BRONZE': 11246, 
+    'DIAMOND': 17030, 
+    'PLATINUM': 15884, 
+    'ABOVE_DIAMOND': 2038
+}
+
+Class distribution. tier + division
+{
+    'IRON_I': 1853,  
+    'IRON_II': 1271,
+    'IRON_III': 1034,
+    'IRON_IV': 825,
+    'BRONZE_I': 2822, 
+    'BRONZE_II': 3028,
+    'BRONZE_III': 3153, 
+    'BRONZE_IV': 2261,
+    'SILVER_I': 3976,
+    'SILVER_II': 4208,
+    'SILVER_III': 4645, 
+    'SILVER_IV': 3713, 
+    'GOLD_I': 3380,
+    'GOLD_II': 4188, 
+    'GOLD_III': 4686,
+    'GOLD_IV': 4236, 
+    'PLATINUM_I': 3220,
+    'PLATINUM_II': 4003,
+    'PLATINUM_III': 4023, 
+    'PLATINUM_IV': 4706,
+    'DIAMOND_I': 2574, 
+    'DIAMOND_II': 3701,
+    'DIAMOND_III': 5079,
+    'DIAMOND_IV': 5753, 
+    'ABOVE_DIAMOND': 2038 
+}

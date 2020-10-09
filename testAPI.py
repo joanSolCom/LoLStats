@@ -1,16 +1,17 @@
 from riotwatcher import LolWatcher
 import json
 from pprint import pprint
-
-apiKey = ""
+from LoLStats import DataGatherer
+apiKey = "RGAPI-7c65bbe4-7df3-4891-bc72-a6bb5671ee55"
 region = "EUW1"
-name = "TeslaTronca"
+name = "Hanjiro"
 iLol = LolWatcher(api_key=apiKey)
-stats = iLol.league.by_summoner(region, "MN6IW9qCcAwpzfS04cDDsDSOscR8mY2ZhRGkhvqSqgiK3ZHM")
-with open('playerInfo.json.json', 'w') as outfile:
-    json.dump(stats, outfile)
+#info = iLol.league.by_summoner(region, "JGVQH4bsD6bWEx1NXS2xFpCo5yobPzqW44PF1aGpogW2AjV1")
+#with open('playerInfoMine.json', 'w') as outfile:
+#    info[0]["region"] = region
+#    json.dump(info, outfile)
 #print(stats)
-exit()
+#exit()
 '''
 Basic Stats
 stats = iLol.league.by_summoner(region, idAccount)
@@ -33,22 +34,11 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
+print(getMatchHistoryByName(iLol,"kelzod"))
+
 #encriptedId , mh = getMatchHistoryByName(iLol, name)
 
 #with open('my_match_history.json', 'w') as outfile:
 #    json.dump(mh, outfile)
 
-print(iLol.league.masters_by_queue(region, "RANKED_SOLO_5x5"))
-
-
-exit()
-for match in mh:
-    if match["queue"] != 420:
-        continue
-
-    idx = match["gameId"]
-    gameInfo = iLol.match.by_id(region=region,match_id=idx)
-    #data = json.loads(gameInfo)
-    with open("rankedGameInfo.json","w") as json_file:
-        json.dump(gameInfo, json_file)
-    break
+#print(iLol.league.masters_by_queue(region, "RANKED_SOLO_5x5"))

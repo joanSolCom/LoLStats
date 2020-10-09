@@ -7,8 +7,8 @@ iDH = DataHelper()
 
 class MatchAnalysis:
 
-    def __init__(self, matchJSON):
-        self.matchDict = json.loads(matchJSON)
+    def __init__(self, matchObj):
+        self.matchDict = matchObj
         self.length = self.matchDict["gameDuration"] #in seconds
         self.date = self.matchDict["gameCreation"]
         self.server = self.matchDict["platformId"]
@@ -29,14 +29,9 @@ class MatchAnalysis:
 
         for pStats, pInfo in zip(self.matchDict["participants"], self.matchDict["participantIdentities"]):           
             iP = Participant(pStats, pInfo, self.length)
-            rank, winrate = self.dg.getAccountRank(self.server, iP.summonerId)
-            iP.setRankInfo(rank, winrate)
-            iP.setFeatures()
             self.participants.append(iP)
             self.participantsById[iP.participantId] = iP
             self.teamsById[iP.teamId].addParticipant(iP)
-
-        print(self.participants)
 
 class Team:
     def __init__(self, teamDict):
@@ -61,7 +56,9 @@ class Team:
 
         for banDict in teamDict["bans"]:
             chid = banDict["championId"]
-            champ = iDH.getChampInfoById(chid).name
+            champ = "No Ban"
+            if chid != -1:
+                champ = iDH.getChampInfoById(chid).name
             self.bans.append(champ)
 
     def addParticipant(self, participant):
@@ -94,6 +91,7 @@ class Participant:
         length = self.gameLength // 60 #transform into minutes
         self.features = {}
         stats = self.participantStats["stats"]
+
         timeline = self.participantStats["timeline"]
 
         #metaFeatures
@@ -139,69 +137,67 @@ class Participant:
         self.features["wardsKilled"] = stats["wardsKilled"] / length
 
         #boolean
-        self.features["firstBloodKill"] = stats["firstBloodKill"]
-        self.features["firstTowerKill"] = stats["firstTowerKill"]
-        self.features["firstTowerAssist"] = stats["firstTowerAssist"]
-        self.features["firstInhibitorKill"] = stats["firstInhibitorKill"]
-        self.features["firstInhibitorAssist"] = stats["firstInhibitorAssist"]
+        self.features["firstBloodKill"] = stats.get("firstBloodKill",-1)
+        self.features["firstBloodAssist"] = stats.get("firstBloodAssist",-1)
+        self.features["firstTowerKill"] = stats.get("firstTowerKill",-1)
+        self.features["firstTowerAssist"] = stats.get("firstTowerAssist",-1)
+        self.features["firstInhibitorKill"] = stats.get("firstInhibitorKill",-1)
+        self.features["firstInhibitorAssist"] = stats.get("firstInhibitorAssist",-1)
 
         #timeline features
         #minion differences
-        self.features["creepsPerMinDeltaEarlyGame"] = 0
-        if "0-10" in timeline["creepsPerMinDeltas"]:
-            self.features["creepsPerMinDeltaEarlyGame"] = timeline["creepsPerMinDeltas"]["0-10"]
-    
-        self.features["creepsPerMinDeltaMidGame"] = 0
-        if "10-20" in timeline["creepsPerMinDeltas"]:
-            self.features["creepsPerMinDeltaMidGame"] = timeline["creepsPerMinDeltas"]["10-20"]
-    
-        self.features["creepsPerMinDeltaLateGame"] = 0
-        if "20-30" in timeline["creepsPerMinDeltas"]:
-            self.features["creepsPerMinDeltaLateGame"] = timeline["creepsPerMinDeltas"]["20-30"]
-    
-        self.features["creepsPerMinDeltaEndGame"] = 0
-        if "30-end" in timeline["creepsPerMinDeltas"]:
-            self.features["creepsPerMinDeltaEndGame"] = timeline["creepsPerMinDeltas"]["30-end"]
+        self.features["creepsPerMinDeltaEarlyGame"] = -1
+        self.features["creepsPerMinDeltaMidGame"] = -1
+        self.features["creepsPerMinDeltaLateGame"] = -1
+        self.features["creepsPerMinDeltaEndGame"] = -1
+
+        if "creepsPerMinDeltas" in timeline:
+            if "0-10" in timeline["creepsPerMinDeltas"]:
+                self.features["creepsPerMinDeltaEarlyGame"] = timeline["creepsPerMinDeltas"]["0-10"]
+            if "10-20" in timeline["creepsPerMinDeltas"]:
+                self.features["creepsPerMinDeltaMidGame"] = timeline["creepsPerMinDeltas"]["10-20"]
+            if "20-30" in timeline["creepsPerMinDeltas"]:
+                self.features["creepsPerMinDeltaLateGame"] = timeline["creepsPerMinDeltas"]["20-30"]
+            if "30-end" in timeline["creepsPerMinDeltas"]:
+                self.features["creepsPerMinDeltaEndGame"] = timeline["creepsPerMinDeltas"]["30-end"]
 
         #EXP differences
-        self.features["xpPerMinDeltaEarlyGame"] = 0
-        if "0-10" in timeline["xpPerMinDeltas"]:
-            self.features["xpPerMinDeltaEarlyGame"] = timeline["xpPerMinDeltas"]["0-10"]
-    
-        self.features["xpPerMinDeltaMidGame"] = 0
-        if "10-20" in timeline["xpPerMinDeltas"]:
-            self.features["xpPerMinDeltaMidGame"] = timeline["xpPerMinDeltas"]["10-20"]
-    
-        self.features["xpPerMinDeltaLateGame"] = 0
-        if "20-30" in timeline["xpPerMinDeltas"]:
-            self.features["xpPerMinDeltaLateGame"] = timeline["xpPerMinDeltas"]["20-30"]
-    
-        self.features["xpPerMinDeltaEndGame"] = 0
-        if "30-end" in timeline["xpPerMinDeltas"]:
-            self.features["xpPerMinDeltaEndGame"] = timeline["xpPerMinDeltas"]["30-end"]
+        self.features["xpPerMinDeltaEarlyGame"] = -1
+        self.features["xpPerMinDeltaMidGame"] = -1
+        self.features["xpPerMinDeltaLateGame"] = -1
+        self.features["xpPerMinDeltaEndGame"] = -1
+
+        if "xpPerMinDeltas" in timeline:
+            if "0-10" in timeline["xpPerMinDeltas"]:
+                self.features["xpPerMinDeltaEarlyGame"] = timeline["xpPerMinDeltas"]["0-10"]
+            if "10-20" in timeline["xpPerMinDeltas"]:
+                self.features["xpPerMinDeltaMidGame"] = timeline["xpPerMinDeltas"]["10-20"]
+            if "20-30" in timeline["xpPerMinDeltas"]:
+                self.features["xpPerMinDeltaLateGame"] = timeline["xpPerMinDeltas"]["20-30"]
+            if "30-end" in timeline["xpPerMinDeltas"]:
+                self.features["xpPerMinDeltaEndGame"] = timeline["xpPerMinDeltas"]["30-end"]
 
         #GOLD DIFFERENCES
-        self.features["goldPerMinDeltasEarlyGame"] = 0
-        if "0-10" in timeline["goldPerMinDeltas"]:
-            self.features["goldPerMinDeltasEarlyGame"] = timeline["goldPerMinDeltas"]["0-10"]
-    
-        self.features["goldPerMinDeltasMidGame"] = 0
-        if "10-20" in timeline["goldPerMinDeltas"]:
-            self.features["goldPerMinDeltasMidGame"] = timeline["goldPerMinDeltas"]["10-20"]
-    
-        self.features["goldPerMinDeltasLateGame"] = 0
-        if "20-30" in timeline["goldPerMinDeltas"]:
-            self.features["goldPerMinDeltasLateGame"] = timeline["goldPerMinDeltas"]["20-30"]
-    
-        self.features["goldPerMinDeltasEndGame"] = 0
-        if "30-end" in timeline["goldPerMinDeltas"]:
-            self.features["goldPerMinDeltasEndGame"] = timeline["goldPerMinDeltas"]["30-end"]
+        self.features["goldPerMinDeltasEarlyGame"] = -1
+        self.features["goldPerMinDeltasMidGame"] = -1
+        self.features["goldPerMinDeltasLateGame"] = -1
+        self.features["goldPerMinDeltasEndGame"] = -1
+
+        if "goldPerMinDeltas" in timeline:
+            if "0-10" in timeline["goldPerMinDeltas"]:
+                self.features["goldPerMinDeltasEarlyGame"] = timeline["goldPerMinDeltas"]["0-10"]
+            if "10-20" in timeline["goldPerMinDeltas"]:
+                self.features["goldPerMinDeltasMidGame"] = timeline["goldPerMinDeltas"]["10-20"]
+            if "20-30" in timeline["goldPerMinDeltas"]:
+                self.features["goldPerMinDeltasLateGame"] = timeline["goldPerMinDeltas"]["20-30"]
+            if "30-end" in timeline["goldPerMinDeltas"]:
+                self.features["goldPerMinDeltasEndGame"] = timeline["goldPerMinDeltas"]["30-end"]
 
         #CS DIFFERENCES
-        self.features["csDiffPerMinDeltasEarlyGame"] = 0
-        self.features["csDiffPerMinDeltasMidGame"] = 0
-        self.features["csDiffPerMinDeltasLateGame"] = 0
-        self.features["csDiffPerMinDeltasEndGame"] = 0
+        self.features["csDiffPerMinDeltasEarlyGame"] = -1
+        self.features["csDiffPerMinDeltasMidGame"] = -1
+        self.features["csDiffPerMinDeltasLateGame"] = -1
+        self.features["csDiffPerMinDeltasEndGame"] = -1
 
         if "csDiffPerMinDeltas" in timeline:
             if "0-10" in timeline["csDiffPerMinDeltas"]:
@@ -215,10 +211,10 @@ class Participant:
 
         #EXP DIFFERENCES PER MIN
 
-        self.features["xpDiffPerMinDeltasEarlyGame"] = 0
-        self.features["xpDiffPerMinDeltasMidGame"] = 0
-        self.features["cxpDiffPerMinDeltasLateGame"] = 0
-        self.features["xpDiffPerMinDeltasEndGame"] = 0
+        self.features["xpDiffPerMinDeltasEarlyGame"] = -1
+        self.features["xpDiffPerMinDeltasMidGame"] = -1
+        self.features["xpDiffPerMinDeltasLateGame"] = -1
+        self.features["xpDiffPerMinDeltasEndGame"] = -1
 
         if "xpDiffPerMinDeltas" in timeline:
             if "0-10" in timeline["xpDiffPerMinDeltas"]:
@@ -231,10 +227,10 @@ class Participant:
                 self.features["xpDiffPerMinDeltasEndGame"] = timeline["xpDiffPerMinDeltas"]["30-end"]
 
         #DMG TAKEN PER MIN
-        self.features["damageTakenPerMinDeltasEarlyGame"] = 0
-        self.features["damageTakenPerMinDeltasMidGame"] = 0
-        self.features["damageTakenPerMinDeltasLateGame"] = 0
-        self.features["damageTakenPerMinDeltasEndGame"] = 0
+        self.features["damageTakenPerMinDeltasEarlyGame"] = -1
+        self.features["damageTakenPerMinDeltasMidGame"] = -1
+        self.features["damageTakenPerMinDeltasLateGame"] = -1
+        self.features["damageTakenPerMinDeltasEndGame"] = -1
 
         if "damageTakenPerMinDeltas" in timeline:
             if "0-10" in timeline["damageTakenPerMinDeltas"]:
@@ -248,10 +244,10 @@ class Participant:
 
         #DMG TAKEN DIFFERENCE PER MIN
 
-        self.features["damageTakenDiffPerMinDeltasEarlyGame"] = 0
-        self.features["damageTakenDiffPerMinDeltasMidGame"] = 0
-        self.features["damageTakenDiffPerMinDeltasLateGame"] = 0
-        self.features["damageTakenDiffPerMinDeltasEndGame"] = 0
+        self.features["damageTakenDiffPerMinDeltasEarlyGame"] = -1
+        self.features["damageTakenDiffPerMinDeltasMidGame"] = -1
+        self.features["damageTakenDiffPerMinDeltasLateGame"] = -1
+        self.features["damageTakenDiffPerMinDeltasEndGame"] = -1
 
         if "damageTakenDiffPerMinDeltas" in timeline:
             if "0-10" in timeline["damageTakenDiffPerMinDeltas"]:
@@ -262,8 +258,12 @@ class Participant:
                 self.features["damageTakenDiffPerMinDeltasLateGame"] = timeline["damageTakenDiffPerMinDeltas"]["20-30"]
             if "30-end" in timeline["damageTakenDiffPerMinDeltas"]:
                 self.features["damageTakenDiffPerMinDeltasEndGame"] = timeline["damageTakenDiffPerMinDeltas"]["30-end"]
+        
+        self.featureNames = sorted(list(self.features.keys()))
+        self.featureVector = []
+        for name in self.featureNames:
+            self.featureVector.append(self.features[name])
 
-        self.featureVector = self.features.values()
         self.label = self.rank
 
     def __repr__(self):
