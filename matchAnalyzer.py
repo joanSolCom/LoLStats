@@ -74,6 +74,7 @@ class Participant:
         self.participantId = participantStats["participantId"]
         self.teamId = str(participantStats["teamId"])
         self.champion = iDH.getChampInfoById(participantStats["championId"]).name
+        self.championId = participantStats["championId"]
         self.statsDict = participantStats["stats"]
         self.timelineDict = participantStats["timeline"]
         self.role = participantStats["timeline"]["role"]
@@ -97,8 +98,10 @@ class Participant:
         #metaFeatures
         self.features["win"] = stats["win"]
         self.features["winrate"] = self.winrate
-        self.features["champ"] = self.champion
-        self.features["role"] = self.role + "_" + self.lane
+        self.features["champ"] = self.championId
+        
+        #TODO ENCODE ROLE
+        #self.features["role"] = self.role + "_" + self.lane
 
         #basic performance measures
         self.features["kills"] = stats["kills"] / length
@@ -137,13 +140,15 @@ class Participant:
         self.features["wardsKilled"] = stats["wardsKilled"] / length
 
         #boolean
+        '''
+        TODO ENCODE BOOLEAN FEATS
         self.features["firstBloodKill"] = stats.get("firstBloodKill",-1)
         self.features["firstBloodAssist"] = stats.get("firstBloodAssist",-1)
         self.features["firstTowerKill"] = stats.get("firstTowerKill",-1)
         self.features["firstTowerAssist"] = stats.get("firstTowerAssist",-1)
         self.features["firstInhibitorKill"] = stats.get("firstInhibitorKill",-1)
         self.features["firstInhibitorAssist"] = stats.get("firstInhibitorAssist",-1)
-
+        '''
         #timeline features
         #minion differences
         self.features["creepsPerMinDeltaEarlyGame"] = -1

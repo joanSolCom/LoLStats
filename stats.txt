@@ -1,44 +1,32 @@
-19553 matches stored
-2,07M users with their ranks
-
-85637 instances to train
-
-Class distribution. Only tier
-{
-    'SILVER': 16512, 
-    'IRON': 4963, 
-    'GOLD': 16478, 
-    'BRONZE': 11246, 
-    'DIAMOND': 17030, 
-    'PLATINUM': 15884, 
-    'ABOVE_DIAMOND': 2038
-}
-
-Class distribution. tier + division
-{
-    'IRON_I': 1853,  
-    'IRON_II': 1271,
-    'IRON_III': 1034,
-    'IRON_IV': 825,
-    'BRONZE_I': 2822, 
-    'BRONZE_II': 3028,
-    'BRONZE_III': 3153, 
-    'BRONZE_IV': 2261,
-    'SILVER_I': 3976,
-    'SILVER_II': 4208,
-    'SILVER_III': 4645, 
-    'SILVER_IV': 3713, 
-    'GOLD_I': 3380,
-    'GOLD_II': 4188, 
-    'GOLD_III': 4686,
-    'GOLD_IV': 4236, 
-    'PLATINUM_I': 3220,
-    'PLATINUM_II': 4003,
-    'PLATINUM_III': 4023, 
-    'PLATINUM_IV': 4706,
-    'DIAMOND_I': 2574, 
-    'DIAMOND_II': 3701,
-    'DIAMOND_III': 5079,
-    'DIAMOND_IV': 5753, 
-    'ABOVE_DIAMOND': 2038 
-}
+({'ABOVE_DIAMOND': 2184,
+  'BRONZE_I': 3110,
+  'BRONZE_II': 3263,
+  'BRONZE_III': 3426,
+  'BRONZE_IV': 2547,
+  'DIAMOND_I': 2834,
+  'DIAMOND_II': 4038,
+  'DIAMOND_III': 5577,
+  'DIAMOND_IV': 6350,
+  'GOLD_I': 3611,
+  'GOLD_II': 4481,
+  'GOLD_III': 5056,
+  'GOLD_IV': 4621,
+  'IRON_I': 2002,
+  'IRON_II': 1428,
+  'IRON_III': 1137,
+  'IRON_IV': 914,
+  'PLATINUM_I': 3473,
+  'PLATINUM_II': 4281,
+  'PLATINUM_III': 4274,
+  'PLATINUM_IV': 5037,
+  'SILVER_I': 4268,
+  'SILVER_II': 4543,
+  'SILVER_III': 4981,
+  'SILVER_IV': 4145},
+ {'ABOVE_DIAMOND': 2184,
+  'BRONZE': 12346,
+  'DIAMOND': 18799,
+  'GOLD': 17769,
+  'IRON': 5481,
+  'PLATINUM': 17065,
+  'SILVER': 17937})

@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from pprint import pprint
 
 class MongoManager:
 
@@ -78,6 +79,7 @@ class MongoManager:
     def getMatchesPerRank(self):
         matches = self.getMatches()
         matchesPerRank = {}
+        matchesPerRankSimple = {}
         unregistered = set()
         instances = []
         for match in matches:
@@ -87,17 +89,24 @@ class MongoManager:
                 if player:
                     instances.append(summonerId)
                     rank = "ABOVE_DIAMOND"
+                    simpleRank = "ABOVE_DIAMOND"
+
                     if "tier" in player:
                         rank = player["tier"]+"_"+player["rank"]
+                        simpleRank = player["tier"]
 
                     if rank not in matchesPerRank:
                         matchesPerRank[rank] = 0
-                    
+
+                    if simpleRank not in matchesPerRankSimple:
+                        matchesPerRankSimple[simpleRank] = 0
+
                     matchesPerRank[rank]+=1
+                    matchesPerRankSimple[simpleRank]+=1
                 else:
                     unregistered.add(summonerId)
-        #print(len(instances), len(unregistered))
-        return matchesPerRank
+        print("Number of instances", len(instances), "Number of not located users", len(unregistered))
+        return matchesPerRank, matchesPerRankSimple
     
 if __name__ == "__main__":
     URI = "mongodb://127.0.0.1:27017"
@@ -107,6 +116,6 @@ if __name__ == "__main__":
     samplePlayer = json.loads(open("playerInfo.json","r").read())
     iM = MongoManager(URI)
     #iM.getPlayers()
-    print(iM.getMatchesPerRank())
+    pprint(iM.getMatchesPerRank())
     #print(iM.findBySummonerId(database,collection,"MN6IW9qCcAwpzfS04cDDsDSOscR8mY2ZhRGkhvqSqgiK3ZHM"))
     #print(iM.insertPlayers(database, collection, samplePlayer))

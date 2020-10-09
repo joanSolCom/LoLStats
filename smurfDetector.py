@@ -1,6 +1,9 @@
 from mongoManager import MongoManager
 from matchAnalyzer import MatchAnalysis
 from pprint import pprint
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
 
 class SmurfDetector:
 
@@ -38,7 +41,10 @@ class SmurfDetector:
                     #print(label)
                     #print("---------------------")
 
-        print(len(X), len(y))
+        clf = RandomForestClassifier()
+        print("Training....")
+        print(np.mean(cross_val_score(clf, X, y, cv=10)))
+        
 
 if __name__ == "__main__":
     iSD = SmurfDetector()
