@@ -8,6 +8,7 @@ class MongoManager:
         self.db = self.client["smurfington"]
         self.players = self.db["players"]
         self.matches = self.db["matches"]
+        self.timelines = self.db["timelines"]
 
     def insertPlayers(self, database, collection, players):
         toInsert = []
@@ -26,6 +27,18 @@ class MongoManager:
     
         return result
     
+    def insertTimeline(self, timeline):
+        gameId = timeline["gameId"]
+        query = {"gameId":gameId}
+        alreadyHave = self.timelines.find_one(query)
+        result = None
+        if not alreadyHave:
+            result = self.timelines.insert_one(timeline)
+        else:
+            print("already have",gameId)
+
+        return result
+
     def findBySummonerId(self, summonerId):
         query = {"summonerId":summonerId}
         res = self.players.find_one(query)

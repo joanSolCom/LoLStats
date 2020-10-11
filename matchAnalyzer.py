@@ -79,6 +79,7 @@ class Participant:
         self.timelineDict = participantStats["timeline"]
         self.role = participantStats["timeline"]["role"]
         self.lane = participantStats["timeline"]["lane"]
+        self.position = self.role + "_" + self.lane
 
         self.accountId = participantInfo["player"]["accountId"]
         self.summonerName = participantInfo["player"]["summonerName"]
@@ -96,61 +97,29 @@ class Participant:
         timeline = self.participantStats["timeline"]
 
         #metaFeatures
-        self.features["win"] = stats["win"]
+        #self.features["win"] = stats["win"]
         self.features["winrate"] = self.winrate
-        self.features["champ"] = self.championId
+        #self.features["champ"] = self.championId
         
         #TODO ENCODE ROLE
         #self.features["role"] = self.role + "_" + self.lane
 
         #basic performance measures
-        self.features["kills"] = stats["kills"] / length
-        self.features["deaths"] = stats["deaths"] / length
-        self.features["assists"] = stats["assists"] / length
-        self.features["goldEarned"] = stats["goldEarned"] / length
-        self.features["totalDamageDealt"] = stats["totalDamageDealt"] / length
-        self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] / length
-        self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60) / length
-        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] / length
-        self.features["champLevel"] = stats["champLevel"]
-
-        #complementary stats
-        self.features["largestKillingSpree"] = stats["largestKillingSpree"]
-        self.features["largestMultiKill"] = stats["largestMultiKill"]
-        self.features["killingSprees"] = stats["killingSprees"]
-        self.features["doubleKills"] = stats["doubleKills"]
-        self.features["tripleKills"] = stats["tripleKills"]
-        self.features["quadraKills"] = stats["quadraKills"]
-        self.features["pentaKills"] = stats["pentaKills"]
-        self.features["totalHeal"] = stats["totalHeal"] / length
-        self.features["totalUnitsHealed"] = stats["totalUnitsHealed"] / length
-        self.features["damageSelfMitigated"] = stats["damageSelfMitigated"] / length
-        self.features["damageDealtToObjectives"] = stats["damageDealtToObjectives"] / length
-        self.features["damageDealtToTurrets"] = stats["damageDealtToTurrets"] / length
+        #self.features["kills"] = stats["kills"] #/ length
+        self.features["deaths"] = stats["deaths"] #/ length
+        #self.features["assists"] = stats["assists"] #/ length
+        self.features["goldEarned"] = stats["goldEarned"] #/ length
+        #self.features["totalDamageDealt"] = stats["totalDamageDealt"] #/ length
+        #self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] #/ length
+        #self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60) #/ length
+        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] #/ length
+        #self.features["champLevel"] = stats["champLevel"]
         self.features["visionScore"] = stats["visionScore"]
-        self.features["timeCCingOthers"] = stats["timeCCingOthers"] / length
-        self.features["totalDamageTaken"] = stats["totalDamageTaken"] / length
-        self.features["goldSpent"] = stats["goldSpent"] / length
-        self.features["turretKills"] = stats["turretKills"]
-        self.features["inhibitorKills"] = stats["inhibitorKills"]
-        self.features["totalTimeCrowdControlDealt"] = stats["totalTimeCrowdControlDealt"] / length
-        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] / length
-        self.features["sightWardsBoughtInGame"] = stats["sightWardsBoughtInGame"] / length
-        self.features["wardsPlaced"] = stats["wardsPlaced"] / length
-        self.features["wardsKilled"] = stats["wardsKilled"] / length
+        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] #/ length
+        self.features["wardsPlaced"] = stats["wardsPlaced"] #/ length
+        self.features["wardsKilled"] = stats["wardsKilled"] #/ length
+        self.features["totalDamageTaken"] = stats["totalDamageTaken"] #/ length
 
-        #boolean
-        '''
-        TODO ENCODE BOOLEAN FEATS
-        self.features["firstBloodKill"] = stats.get("firstBloodKill",-1)
-        self.features["firstBloodAssist"] = stats.get("firstBloodAssist",-1)
-        self.features["firstTowerKill"] = stats.get("firstTowerKill",-1)
-        self.features["firstTowerAssist"] = stats.get("firstTowerAssist",-1)
-        self.features["firstInhibitorKill"] = stats.get("firstInhibitorKill",-1)
-        self.features["firstInhibitorAssist"] = stats.get("firstInhibitorAssist",-1)
-        '''
-        #timeline features
-        #minion differences
         self.features["creepsPerMinDeltaEarlyGame"] = -1
         self.features["creepsPerMinDeltaMidGame"] = -1
         self.features["creepsPerMinDeltaLateGame"] = -1
@@ -198,7 +167,46 @@ class Participant:
             if "30-end" in timeline["goldPerMinDeltas"]:
                 self.features["goldPerMinDeltasEndGame"] = timeline["goldPerMinDeltas"]["30-end"]
 
+                
+        #complementary stats
+        '''
+        self.features["largestKillingSpree"] = stats["largestKillingSpree"]
+        self.features["largestMultiKill"] = stats["largestMultiKill"]
+        self.features["killingSprees"] = stats["killingSprees"]
+        self.features["doubleKills"] = stats["doubleKills"]
+        self.features["tripleKills"] = stats["tripleKills"]
+        self.features["quadraKills"] = stats["quadraKills"]
+        self.features["pentaKills"] = stats["pentaKills"]
+        self.features["totalHeal"] = stats["totalHeal"] #/ length
+        
+        self.features["totalUnitsHealed"] = stats["totalUnitsHealed"] #/ length
+        '''
+        '''
+        self.features["damageSelfMitigated"] = stats["damageSelfMitigated"] #/ length
+        self.features["damageDealtToObjectives"] = stats["damageDealtToObjectives"] #/ length
+        self.features["damageDealtToTurrets"] = stats["damageDealtToTurrets"] #/ length
+        self.features["timeCCingOthers"] = stats["timeCCingOthers"] #/ length
+        self.features["goldSpent"] = stats["goldSpent"] #/ length
+        self.features["turretKills"] = stats["turretKills"]
+        self.features["inhibitorKills"] = stats["inhibitorKills"]
+        self.features["totalTimeCrowdControlDealt"] = stats["totalTimeCrowdControlDealt"] #/ length
+        '''
+        
+        #boolean
+        '''
+        TODO ENCODE BOOLEAN FEATS
+        self.features["firstBloodKill"] = stats.get("firstBloodKill",-1)
+        self.features["firstBloodAssist"] = stats.get("firstBloodAssist",-1)
+        self.features["firstTowerKill"] = stats.get("firstTowerKill",-1)
+        self.features["firstTowerAssist"] = stats.get("firstTowerAssist",-1)
+        self.features["firstInhibitorKill"] = stats.get("firstInhibitorKill",-1)
+        self.features["firstInhibitorAssist"] = stats.get("firstInhibitorAssist",-1)
+        '''
+        #timeline features
+        #minion differences
+        
         #CS DIFFERENCES
+        '''
         self.features["csDiffPerMinDeltasEarlyGame"] = -1
         self.features["csDiffPerMinDeltasMidGame"] = -1
         self.features["csDiffPerMinDeltasLateGame"] = -1
@@ -213,9 +221,9 @@ class Participant:
                 self.features["csDiffPerMinDeltasLateGame"] = timeline["csDiffPerMinDeltas"]["20-30"]
             if "30-end" in timeline["csDiffPerMinDeltas"]:
                 self.features["csDiffPerMinDeltasEndGame"] = timeline["csDiffPerMinDeltas"]["30-end"]
-
+        
         #EXP DIFFERENCES PER MIN
-
+        
         self.features["xpDiffPerMinDeltasEarlyGame"] = -1
         self.features["xpDiffPerMinDeltasMidGame"] = -1
         self.features["xpDiffPerMinDeltasLateGame"] = -1
@@ -230,6 +238,8 @@ class Participant:
                 self.features["xpDiffPerMinDeltasLateGame"] = timeline["xpDiffPerMinDeltas"]["20-30"]
             if "30-end" in timeline["xpDiffPerMinDeltas"]:
                 self.features["xpDiffPerMinDeltasEndGame"] = timeline["xpDiffPerMinDeltas"]["30-end"]
+        
+        '''
 
         #DMG TAKEN PER MIN
         self.features["damageTakenPerMinDeltasEarlyGame"] = -1
@@ -248,7 +258,7 @@ class Participant:
                 self.features["damageTakenPerMinDeltasEndGame"] = timeline["damageTakenPerMinDeltas"]["30-end"]
 
         #DMG TAKEN DIFFERENCE PER MIN
-
+        '''
         self.features["damageTakenDiffPerMinDeltasEarlyGame"] = -1
         self.features["damageTakenDiffPerMinDeltasMidGame"] = -1
         self.features["damageTakenDiffPerMinDeltasLateGame"] = -1
@@ -263,7 +273,8 @@ class Participant:
                 self.features["damageTakenDiffPerMinDeltasLateGame"] = timeline["damageTakenDiffPerMinDeltas"]["20-30"]
             if "30-end" in timeline["damageTakenDiffPerMinDeltas"]:
                 self.features["damageTakenDiffPerMinDeltasEndGame"] = timeline["damageTakenDiffPerMinDeltas"]["30-end"]
-        
+        '''
+
         self.featureNames = sorted(list(self.features.keys()))
         self.featureVector = []
         for name in self.featureNames:

@@ -63,7 +63,7 @@ class LolStats:
 
 class DataGatherer:
 
-    def __init__(self, apiKey = ""):
+    def __init__(self, apiKey = "RGAPI-c83d27cf-1d50-4568-85f4-fce644e12eaf"):
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
     
@@ -71,7 +71,14 @@ class DataGatherer:
         me = self.iLol.summoner.by_name(region, name)
         idAccount = me["id"]
         info = self.iLol.league.by_summoner(region, idAccount)
+        info["region"] = region
         return info
+
+    def getMatchTimeline(self, region, gameId):
+        print(region, gameId)
+        timeline = self.iLol.match.timeline_by_match(region,gameId)
+        timeline["gameId"] = gameId
+        return timeline
 
     def getUsersPerLeague(self, region, tier, division="I", page=1):
         userList = []
