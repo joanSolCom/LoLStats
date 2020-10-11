@@ -26,17 +26,24 @@ class MongoManager:
             result = self.players.insert_many(toInsert)
     
         return result
+
+    def getMatchesWithNoTimelines(self):
+        matches = self.getMatches()
+        print("Total matches",len(matches))
+        toCrawl = []
+
+        for match in matches:
+            gameId = match["gameId"]
+            query = {"gameId":gameId}
+            alreadyHave = self.timelines.find_one(query)
+            if not alreadyHave:
+                toCrawl.append(match)
+
+        print("With no timeline",len(toCrawl))
+        return toCrawl
     
     def insertTimeline(self, timeline):
-        gameId = timeline["gameId"]
-        query = {"gameId":gameId}
-        alreadyHave = self.timelines.find_one(query)
-        result = None
-        if not alreadyHave:
-            result = self.timelines.insert_one(timeline)
-        else:
-            print("already have",gameId)
-
+        result = self.timelines.insert_one(timeline)
         return result
 
     def findBySummonerId(self, summonerId):
@@ -56,7 +63,6 @@ class MongoManager:
         matches = []
         for match in self.matches.find():
             matches.append(match)
-            print(len(matches))
 
         return matches
 
