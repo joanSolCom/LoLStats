@@ -10,6 +10,12 @@ class MongoManager:
         self.matches = self.db["matches"]
         self.timelines = self.db["timelines"]
 
+    def getMatchAndTimeline(self, gameId):
+        query = {"gameId":gameId}
+        match = self.matches.find_one(query)
+        timeline = self.timelines.find_one(query)
+        return match, timeline
+
     def insertPlayers(self, database, collection, players):
         toInsert = []
 

@@ -2,22 +2,6 @@ from riotwatcher import LolWatcher
 import json
 from pprint import pprint
 from LoLStats import DataGatherer
-apiKey = "RGAPI-7c65bbe4-7df3-4891-bc72-a6bb5671ee55"
-region = "EUW1"
-name = "Hanjiro"
-iLol = LolWatcher(api_key=apiKey)
-#info = iLol.league.by_summoner(region, "JGVQH4bsD6bWEx1NXS2xFpCo5yobPzqW44PF1aGpogW2AjV1")
-#with open('playerInfoMine.json', 'w') as outfile:
-#    info[0]["region"] = region
-#    json.dump(info, outfile)
-#print(stats)
-#exit()
-'''
-Basic Stats
-stats = iLol.league.by_summoner(region, idAccount)
-print(stats)
-[{'leagueId': 'a1caa462-e044-4f23-8140-76c40bb5a25a', 'queueType': 'RANKED_SOLO_5x5', 'tier': 'BRONZE', 'rank': 'I', 'summonerId': 'JGVQH4bsD6bWEx1NXS2xFpCo5yobPzqW44PF1aGpogW2AjV1', 'summonerName': 'TeslaTronca', 'leaguePoints': 55, 'wins': 86, 'losses': 102, 'veteran': False, 'inactive': False, 'freshBlood': False, 'hotStreak': False}]
-'''
 
 def getMatchHistoryByName(iLol, name):
     me = iLol.summoner.by_name(region, name)
@@ -34,7 +18,35 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
-print(getMatchHistoryByName(iLol,"kelzod"))
+apiKey = "RGAPI-c83d27cf-1d50-4568-85f4-fce644e12eaf"
+region = "EUW1"
+iLol = LolWatcher(api_key=apiKey)
+
+gameId = 2081357982
+import roleml
+from mongoManager import MongoManager
+iM = MongoManager()
+match, timeline = iM.getMatchAndTimeline(gameId)
+print(roleml.predict(match, timeline))
+
+#print(getMatchHistoryByName(iLol,"TeslaTronca"))
+#timeline = iLol.match.timeline_by_match("EUW1","4353208107")
+#pprint(timeline)
+exit()
+#info = iLol.league.by_summoner(region, "JGVQH4bsD6bWEx1NXS2xFpCo5yobPzqW44PF1aGpogW2AjV1")
+#with open('playerInfoMine.json', 'w') as outfile:
+#    info[0]["region"] = region
+#    json.dump(info, outfile)
+#print(stats)
+#exit()
+'''
+Basic Stats
+stats = iLol.league.by_summoner(region, idAccount)
+print(stats)
+[{'leagueId': 'a1caa462-e044-4f23-8140-76c40bb5a25a', 'queueType': 'RANKED_SOLO_5x5', 'tier': 'BRONZE', 'rank': 'I', 'summonerId': 'JGVQH4bsD6bWEx1NXS2xFpCo5yobPzqW44PF1aGpogW2AjV1', 'summonerName': 'TeslaTronca', 'leaguePoints': 55, 'wins': 86, 'losses': 102, 'veteran': False, 'inactive': False, 'freshBlood': False, 'hotStreak': False}]
+'''
+
+
 
 #encriptedId , mh = getMatchHistoryByName(iLol, name)
 
