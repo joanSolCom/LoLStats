@@ -63,7 +63,7 @@ class LolStats:
 
 class DataGatherer:
 
-    def __init__(self, apiKey = "RGAPI-c83d27cf-1d50-4568-85f4-fce644e12eaf"):
+    def __init__(self, apiKey = "RGAPI-dd8f97ea-3caa-4460-a09b-889e764c19ed"):
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
     

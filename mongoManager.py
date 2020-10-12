@@ -16,6 +16,28 @@ class MongoManager:
         timeline = self.timelines.find_one(query)
         return match, timeline
 
+    def getTimelines(self):
+        timelines = []
+        for t in self.timelines.find():
+            timelines.append(t)
+
+        return timelines
+    
+    def getAllMatchesAndTimelines(self):
+        timelines = self.getTimelines()
+        matches = []
+
+        for t in timelines:
+            gameId = t["gameId"]
+            query = {"gameId":gameId}
+            match = self.matches.find_one(query)
+            if match:
+                matches.append(match)
+            else:
+                raise Exception("SOMETHING VERY WRONG IS GOING ON")
+
+        return matches, timelines
+
     def insertPlayers(self, database, collection, players):
         toInsert = []
 

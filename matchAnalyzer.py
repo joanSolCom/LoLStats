@@ -2,12 +2,12 @@ import json
 from LoLStats import LolStats
 from LoLStats import DataGatherer
 from dataHelper import DataHelper
-
+import roleml
 iDH = DataHelper()
 
 class MatchAnalysis:
 
-    def __init__(self, matchObj):
+    def __init__(self, matchObj, timelineObj=None):
         self.matchDict = matchObj
         self.length = self.matchDict["gameDuration"] #in seconds
         self.date = self.matchDict["gameCreation"]
@@ -18,20 +18,51 @@ class MatchAnalysis:
         self.participants = []
         self.participantsById = {}
         self.winner = None
+        self.realRoles = None
+        self.orderedParticipants = []
+        self.teamsByIdAndByPosition = {}
+
+        self.roles = None
+        if timelineObj:
+            self.realRoles = roleml.predict(matchObj, timelineObj)
+            if not self.roles:
+                self.roles = set(self.realRoles.values())
 
         for team in self.matchDict["teams"]:
             iT = Team(team)
             if iT.win == "Win":
                 self.winner = iT.teamId
 
+            self.teamsByIdAndByPosition[iT.teamId] = {}
             self.teams.append(iT)
             self.teamsById[iT.teamId] = iT
 
         for pStats, pInfo in zip(self.matchDict["participants"], self.matchDict["participantIdentities"]):           
             iP = Participant(pStats, pInfo, self.length)
+            if timelineObj:
+                iP.position = self.realRoles[iP.participantId]
+                #print(iP.position)
+                #print(iP.role + "_" + iP.lane)           
+                self.teamsByIdAndByPosition[iP.teamId][iP.position] = iP
+
             self.participants.append(iP)
             self.participantsById[iP.participantId] = iP
             self.teamsById[iP.teamId].addParticipant(iP)
+        
+    def getGlobalFeatures(self):
+        self.globalFeatureVector = []
+        for idTeam, dictPositions in self.teamsByIdAndByPosition.items():
+            for role in self.roles:
+                if role not in dictPositions.keys():
+                    raise Exception("HOLA")
+                else:
+                    part = dictPositions[role]
+                    fv = part.featureVector
+                    fv.append(idTeam)
+                    for feat in fv:
+                        self.globalFeatureVector.append(feat)
+
+        return self.globalFeatureVector
 
 class Team:
     def __init__(self, teamDict):
@@ -98,27 +129,27 @@ class Participant:
 
         #metaFeatures
         #self.features["win"] = stats["win"]
-        self.features["winrate"] = self.winrate
-        #self.features["champ"] = self.championId
-        
+        #self.features["winrate"] = self.winrate
+        self.features["champ"] = self.championId
+        self.features["team"] = self.teamId
         #TODO ENCODE ROLE
         #self.features["role"] = self.role + "_" + self.lane
 
         #basic performance measures
-        #self.features["kills"] = stats["kills"] #/ length
-        self.features["deaths"] = stats["deaths"] #/ length
-        #self.features["assists"] = stats["assists"] #/ length
-        self.features["goldEarned"] = stats["goldEarned"] #/ length
-        #self.features["totalDamageDealt"] = stats["totalDamageDealt"] #/ length
-        #self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] #/ length
-        #self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60) #/ length
-        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] #/ length
-        #self.features["champLevel"] = stats["champLevel"]
+        self.features["kills"] = stats["kills"] / length
+        self.features["deaths"] = stats["deaths"] / length
+        self.features["assists"] = stats["assists"] / length
+        self.features["goldEarned"] = stats["goldEarned"] / length
+        self.features["totalDamageDealt"] = stats["totalDamageDealt"] / length
+        self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] / length
+        self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60) / length
+        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] / length
+        self.features["champLevel"] = stats["champLevel"]
         self.features["visionScore"] = stats["visionScore"]
-        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] #/ length
-        self.features["wardsPlaced"] = stats["wardsPlaced"] #/ length
-        self.features["wardsKilled"] = stats["wardsKilled"] #/ length
-        self.features["totalDamageTaken"] = stats["totalDamageTaken"] #/ length
+        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] / length
+        self.features["wardsPlaced"] = stats["wardsPlaced"] / length
+        self.features["wardsKilled"] = stats["wardsKilled"] / length
+        self.features["totalDamageTaken"] = stats["totalDamageTaken"] / length
 
         self.features["creepsPerMinDeltaEarlyGame"] = -1
         self.features["creepsPerMinDeltaMidGame"] = -1
@@ -167,9 +198,8 @@ class Participant:
             if "30-end" in timeline["goldPerMinDeltas"]:
                 self.features["goldPerMinDeltasEndGame"] = timeline["goldPerMinDeltas"]["30-end"]
 
-                
         #complementary stats
-        '''
+        
         self.features["largestKillingSpree"] = stats["largestKillingSpree"]
         self.features["largestMultiKill"] = stats["largestMultiKill"]
         self.features["killingSprees"] = stats["killingSprees"]
@@ -180,8 +210,7 @@ class Participant:
         self.features["totalHeal"] = stats["totalHeal"] #/ length
         
         self.features["totalUnitsHealed"] = stats["totalUnitsHealed"] #/ length
-        '''
-        '''
+
         self.features["damageSelfMitigated"] = stats["damageSelfMitigated"] #/ length
         self.features["damageDealtToObjectives"] = stats["damageDealtToObjectives"] #/ length
         self.features["damageDealtToTurrets"] = stats["damageDealtToTurrets"] #/ length
@@ -190,7 +219,6 @@ class Participant:
         self.features["turretKills"] = stats["turretKills"]
         self.features["inhibitorKills"] = stats["inhibitorKills"]
         self.features["totalTimeCrowdControlDealt"] = stats["totalTimeCrowdControlDealt"] #/ length
-        '''
         
         #boolean
         '''
@@ -206,7 +234,7 @@ class Participant:
         #minion differences
         
         #CS DIFFERENCES
-        '''
+        
         self.features["csDiffPerMinDeltasEarlyGame"] = -1
         self.features["csDiffPerMinDeltasMidGame"] = -1
         self.features["csDiffPerMinDeltasLateGame"] = -1
@@ -239,7 +267,7 @@ class Participant:
             if "30-end" in timeline["xpDiffPerMinDeltas"]:
                 self.features["xpDiffPerMinDeltasEndGame"] = timeline["xpDiffPerMinDeltas"]["30-end"]
         
-        '''
+        
 
         #DMG TAKEN PER MIN
         self.features["damageTakenPerMinDeltasEarlyGame"] = -1
@@ -258,7 +286,7 @@ class Participant:
                 self.features["damageTakenPerMinDeltasEndGame"] = timeline["damageTakenPerMinDeltas"]["30-end"]
 
         #DMG TAKEN DIFFERENCE PER MIN
-        '''
+        
         self.features["damageTakenDiffPerMinDeltasEarlyGame"] = -1
         self.features["damageTakenDiffPerMinDeltasMidGame"] = -1
         self.features["damageTakenDiffPerMinDeltasLateGame"] = -1
@@ -273,14 +301,14 @@ class Participant:
                 self.features["damageTakenDiffPerMinDeltasLateGame"] = timeline["damageTakenDiffPerMinDeltas"]["20-30"]
             if "30-end" in timeline["damageTakenDiffPerMinDeltas"]:
                 self.features["damageTakenDiffPerMinDeltasEndGame"] = timeline["damageTakenDiffPerMinDeltas"]["30-end"]
-        '''
+        
 
         self.featureNames = sorted(list(self.features.keys()))
         self.featureVector = []
         for name in self.featureNames:
             self.featureVector.append(self.features[name])
 
-        self.label = self.rank
+        #self.label = self.rank
 
     def __repr__(self):
         winner = self.features["win"]

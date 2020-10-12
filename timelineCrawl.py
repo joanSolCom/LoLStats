@@ -1,7 +1,6 @@
 from riotwatcher import LolWatcher
 from mongoManager import MongoManager
 from LoLStats import DataGatherer
-import random
 
 apiKey = "RGAPI-c83d27cf-1d50-4568-85f4-fce644e12eaf"
 iLol = LolWatcher(api_key=apiKey)
@@ -9,7 +8,6 @@ regions = ["EUW1", "NA1", "EUN1","BR1","JP1","KR","LA1","LA2","OC1", "RU","TR1"]
 
 iM = MongoManager()
 matches = iM.getMatchesWithNoTimelines()
-random.shuffle(matches)
 
 #timeline = iLol.match.timeline_by_match(region,gameId)
 gameIdsPerRegion = {}
