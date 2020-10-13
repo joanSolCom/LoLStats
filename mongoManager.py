@@ -16,15 +16,21 @@ class MongoManager:
         timeline = self.timelines.find_one(query)
         return match, timeline
 
-    def getTimelines(self):
+    def getTimelines(self, maxNumber = None):
         timelines = []
-        for t in self.timelines.find():
-            timelines.append(t)
+        if maxNumber:
+            for t in self.timelines.find().limit(maxNumber):
+                timelines.append(t)
+        
+        else:
+            for t in self.timelines.find():
+                timelines.append(t)
 
         return timelines
     
-    def getAllMatchesAndTimelines(self):
-        timelines = self.getTimelines()
+    def getAllMatchesAndTimelines(self, maxNumber=None):
+        timelines = self.getTimelines(maxNumber)
+        print(len(timelines))
         matches = []
 
         for t in timelines:

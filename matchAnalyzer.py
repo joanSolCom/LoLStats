@@ -51,6 +51,7 @@ class MatchAnalysis:
         
     def getGlobalFeatures(self):
         self.globalFeatureVector = []
+        self.globalFeatureNames = []
         for idTeam, dictPositions in self.teamsByIdAndByPosition.items():
             for role in self.roles:
                 if role not in dictPositions.keys():
@@ -58,8 +59,11 @@ class MatchAnalysis:
                 else:
                     part = dictPositions[role]
                     fv = part.featureVector
+                    fn = part.featureNames
+                    self.globalFeatureNames.append(fn)
                     fv.append(idTeam)
                     for feat in fv:
+                        
                         self.globalFeatureVector.append(feat)
 
         return self.globalFeatureVector
@@ -136,20 +140,24 @@ class Participant:
         #self.features["role"] = self.role + "_" + self.lane
 
         #basic performance measures
-        self.features["kills"] = stats["kills"] / length
-        self.features["deaths"] = stats["deaths"] / length
-        self.features["assists"] = stats["assists"] / length
-        self.features["goldEarned"] = stats["goldEarned"] / length
-        self.features["totalDamageDealt"] = stats["totalDamageDealt"] / length
-        self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] / length
-        self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60) / length
-        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] / length
+        self.features["kills"] = stats["kills"] #/ length
+        self.features["deaths"] = stats["deaths"] #/ length
+        self.features["assists"] = stats["assists"] #/ length
+        self.features["goldEarned"] = stats["goldEarned"] #/ length
+        self.features["totalDamageDealt"] = stats["totalDamageDealt"] #/ length
+        self.features["totalDamageDealtToChampions"] = stats["totalDamageDealtToChampions"] #/ length
+        self.features["longestTimeSpentLiving"] = (stats["longestTimeSpentLiving"] // 60)
+        self.features["totalMinionsKilled"] = stats["totalMinionsKilled"] #/ length
         self.features["champLevel"] = stats["champLevel"]
         self.features["visionScore"] = stats["visionScore"]
-        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] / length
-        self.features["wardsPlaced"] = stats["wardsPlaced"] / length
-        self.features["wardsKilled"] = stats["wardsKilled"] / length
-        self.features["totalDamageTaken"] = stats["totalDamageTaken"] / length
+        self.features["visionWardsBoughtInGame"] = stats["visionWardsBoughtInGame"] #/ length
+        self.features["wardsPlaced"] = stats["wardsPlaced"] #/ length
+        self.features["wardsKilled"] = stats["wardsKilled"] #/ length
+        self.features["totalDamageTaken"] = stats["totalDamageTaken"] #/ length
+
+        self.features["neutralMinionsKilled"] = stats["neutralMinionsKilled"] #/ length
+        self.features["neutralMinionsKilledTeamJungle"] = stats["neutralMinionsKilledTeamJungle"] #/ length
+        self.features["neutralMinionsKilledEnemyJungle"] = stats["neutralMinionsKilledEnemyJungle"] #/ length
 
         self.features["creepsPerMinDeltaEarlyGame"] = -1
         self.features["creepsPerMinDeltaMidGame"] = -1

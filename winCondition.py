@@ -2,6 +2,7 @@ from mongoManager import MongoManager
 from matchAnalyzer import MatchAnalysis
 from sklearn.model_selection import KFold
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 import numpy as np
@@ -15,7 +16,8 @@ class WinCondition:
         usable = 0
         X = []
         y = []
-        
+        stdGlobalFeatureNames = None
+
         for match, timeline in zip(matches,timelines):    
             if match["gameDuration"] // 60 > 15:
                 try:
@@ -26,7 +28,13 @@ class WinCondition:
                     gfv = iM.getGlobalFeatures()
                     if len(gfv) != 620:
                         print("Wrong feat length", len(gfv))
+                        #print(iM.globalFeatureNames)
+                        #print(stdGlobalFeatureNames)
+                        #exit()
                         continue
+                    else:
+                        if not stdGlobalFeatureNames:
+                            stdGlobalFeatureNames = iM.globalFeatureNames
 
                     X.append(gfv)
                     y.append(iM.winner)
@@ -34,6 +42,7 @@ class WinCondition:
                 except:
                     notUsable+=1
                     continue
+
         print(X[0])
         print("usable",usable)
         print("not usable",notUsable)
