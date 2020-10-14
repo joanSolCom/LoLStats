@@ -18,17 +18,27 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
-apiKey = "RGAPI-c83d27cf-1d50-4568-85f4-fce644e12eaf"
+apiKey = "RGAPI-dd8f97ea-3caa-4460-a09b-889e764c19ed"
 region = "EUW1"
 iLol = LolWatcher(api_key=apiKey)
+name="TeslaTronca"
 
+me = iLol.summoner.by_name(region, name)
+idAccount = me["id"]
+encriptedId = me["accountId"]
+
+print(iLol.champion_mastery.scores_by_summoner(region,idAccount))
+
+
+'''
 gameId = 2081357982
+
 import roleml
 from mongoManager import MongoManager
 iM = MongoManager()
 match, timeline = iM.getMatchAndTimeline(gameId)
 print(roleml.predict(match, timeline))
-
+'''
 #print(getMatchHistoryByName(iLol,"TeslaTronca"))
 #timeline = iLol.match.timeline_by_match("EUW1","4353208107")
 #pprint(timeline)

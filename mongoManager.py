@@ -9,6 +9,24 @@ class MongoManager:
         self.players = self.db["players"]
         self.matches = self.db["matches"]
         self.timelines = self.db["timelines"]
+        self.fullmatches = self.db["fullmatches"]
+
+    def buildFullMatches(self):
+        if self.fullmatches:
+            self.fullmatches.delete_many({})
+
+        matches, timelines = self.getAllMatchesAndTimelines()
+        for match, timeline in zip(matches,timelines):
+            obj = {}
+            obj["gameId"] = match["gameId"]
+            obj["participants"] = []
+            for part in match["participantIdentities"]:
+                idx = part["player"]["currentAccountId"]
+                obj["participants"].append(idx)
+
+            obj["match"] = match
+            obj["timeline"] = timeline
+            self.fullmatches.insert_one(obj)
 
     def getMatchAndTimeline(self, gameId):
         query = {"gameId":gameId}
@@ -168,7 +186,8 @@ if __name__ == "__main__":
     collection = "players"
     samplePlayer = json.loads(open("playerInfo.json","r").read())
     iM = MongoManager(URI)
+    iM.buildFullMatches()
     #iM.getPlayers()
-    pprint(iM.getMatchesPerRank())
+    #pprint(iM.getMatchesPerRank())
     #print(iM.findBySummonerId(database,collection,"MN6IW9qCcAwpzfS04cDDsDSOscR8mY2ZhRGkhvqSqgiK3ZHM"))
     #print(iM.insertPlayers(database, collection, samplePlayer))

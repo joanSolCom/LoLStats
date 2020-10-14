@@ -216,7 +216,6 @@ class Participant:
         self.features["quadraKills"] = stats["quadraKills"]
         self.features["pentaKills"] = stats["pentaKills"]
         self.features["totalHeal"] = stats["totalHeal"] #/ length
-        
         self.features["totalUnitsHealed"] = stats["totalUnitsHealed"] #/ length
 
         self.features["damageSelfMitigated"] = stats["damageSelfMitigated"] #/ length
