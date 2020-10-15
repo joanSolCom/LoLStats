@@ -2,6 +2,7 @@ from riotwatcher import LolWatcher
 import json
 from pprint import pprint
 from LoLStats import DataGatherer
+from playerScore import Score
 
 def getMatchHistoryByName(iLol, name):
     me = iLol.summoner.by_name(region, name)
@@ -18,16 +19,21 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
-apiKey = "RGAPI-dd8f97ea-3caa-4460-a09b-889e764c19ed"
+apiKey = "RGAPI-a3e85df8-c061-4aaa-bc92-4a809223c190"
 region = "EUW1"
 iLol = LolWatcher(api_key=apiKey)
 name="TeslaTronca"
-
 me = iLol.summoner.by_name(region, name)
 idAccount = me["id"]
 encriptedId = me["accountId"]
 
-print(iLol.champion_mastery.scores_by_summoner(region,idAccount))
+match_obj = iLol.match.matchlist_by_account(region, encriptedId)
+idGame = match_obj["matches"][40]["gameId"]
+
+iDH = DataGatherer()
+match, timeline = iDH.getMatchAndTimeline(region, idGame)
+iS = Score(match, timeline)
+#print(iLol.champion_mastery.scores_by_summoner(region,idAccount))
 
 
 '''

@@ -1,32 +1,36 @@
 from pymongo import MongoClient
 from pprint import pprint
+from random import shuffle
 
 class MongoManager:
 
     def __init__(self, MONGOURI="mongodb://127.0.0.1:27017"):
         self.client = MongoClient(MONGOURI)
         self.db = self.client["smurfington"]
-        self.players = self.db["players"]
+        #self.players = self.db["players"]
         self.matches = self.db["matches"]
         self.timelines = self.db["timelines"]
         self.fullmatches = self.db["fullmatches"]
 
     def buildFullMatches(self):
-        if self.fullmatches:
-            self.fullmatches.delete_many({})
+        matches, timelines = self.getAllMatchesAndTimelines(3500)
 
-        matches, timelines = self.getAllMatchesAndTimelines()
-        for match, timeline in zip(matches,timelines):
-            obj = {}
-            obj["gameId"] = match["gameId"]
-            obj["participants"] = []
-            for part in match["participantIdentities"]:
-                idx = part["player"]["currentAccountId"]
-                obj["participants"].append(idx)
+        for match, timeline in zip(matches, timelines):
+            query = {"gameId":match["gameId"]} 
+            fullmatch = self.fullmatches.find_one(query)
+            if not fullmatch:
+                obj = {}
+                obj["gameId"] = match["gameId"]
+                obj["participants"] = []
+                for part in match["participantIdentities"]:
+                    idx = part["player"]["currentAccountId"]
+                    obj["participants"].append(idx)
 
-            obj["match"] = match
-            obj["timeline"] = timeline
-            self.fullmatches.insert_one(obj)
+                obj["match"] = match
+                obj["timeline"] = timeline
+                self.fullmatches.insert_one(obj)
+            else:
+                print("had this one")
 
     def getMatchAndTimeline(self, gameId):
         query = {"gameId":gameId}
@@ -37,7 +41,7 @@ class MongoManager:
     def getTimelines(self, maxNumber = None):
         timelines = []
         if maxNumber:
-            for t in self.timelines.find().limit(maxNumber):
+            for t in self.timelines.aggregate([{"$sample": {"size": maxNumber}}]):
                 timelines.append(t)
         
         else:
@@ -46,21 +50,9 @@ class MongoManager:
 
         return timelines
     
-    def getAllMatchesAndTimelines(self, maxNumber=None):
-        timelines = self.getTimelines(maxNumber)
-        print(len(timelines))
-        matches = []
-
-        for t in timelines:
-            gameId = t["gameId"]
-            query = {"gameId":gameId}
-            match = self.matches.find_one(query)
-            if match:
-                matches.append(match)
-            else:
-                raise Exception("SOMETHING VERY WRONG IS GOING ON")
-
-        return matches, timelines
+    def getAllMatchesAndTimelines(self, maxNumber=30000):
+        fullmatches = self.getFullMatches(maxNumber)
+        return fullmatches
 
     def insertPlayers(self, database, collection, players):
         toInsert = []
@@ -117,6 +109,13 @@ class MongoManager:
             matches.append(match)
 
         return matches
+
+    def getFullMatches(self, maxNumber=30000):
+        fmatches = []
+        for fmatch in self.fullmatches.find().limit(maxNumber):
+            fmatches.append(fmatch)
+
+        return fmatches
 
     def getPlayersPerRegion(self, region):
         players = []

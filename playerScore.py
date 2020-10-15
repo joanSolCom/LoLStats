@@ -96,7 +96,9 @@ class Score:
 
 if __name__ == "__main__":
     iMo = MongoManager()
-    matches, timelines = iMo.getAllMatchesAndTimelines(50)
-    for match, timeline in zip(matches,timelines):    
+    fullmatches = iMo.getAllMatchesAndTimelines(150)
+    for fm in fullmatches:    
+        match = fm["match"]
+        timeline = fm["timeline"]
         if match["gameDuration"] // 60 > 15: 
             iPS = Score(match, timeline)
