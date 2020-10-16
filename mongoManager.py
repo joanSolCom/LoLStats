@@ -7,7 +7,7 @@ class MongoManager:
     def __init__(self, MONGOURI="mongodb://127.0.0.1:27017"):
         self.client = MongoClient(MONGOURI)
         self.db = self.client["smurfington"]
-        #self.players = self.db["players"]
+        self.players = self.db["players"]
         self.matches = self.db["matches"]
         self.timelines = self.db["timelines"]
         self.fullmatches = self.db["fullmatches"]
@@ -102,7 +102,14 @@ class MongoManager:
             print(len(players))
 
         return players
-    
+
+    def getSpecificFullmatches(self, keyfullmatches):
+        fms = []
+        for gameId in keyfullmatches:
+            fm = self.getFullMatchById(int(gameId))
+            fms.append(fm)
+        return fms
+
     def getMatches(self):
         matches = []
         for match in self.matches.find():
@@ -112,10 +119,15 @@ class MongoManager:
 
     def getFullMatches(self, maxNumber=30000):
         fmatches = []
-        for fmatch in self.fullmatches.find().limit(maxNumber):
+        for fmatch in self.fullmatches.find({"match.gameDuration":{"$gt":1200}}).limit(maxNumber):
             fmatches.append(fmatch)
 
         return fmatches
+
+    def getFullMatchById(self, gameId):
+        query = {"gameId":gameId}
+        fmatch = self.fullmatches.find_one(query)
+        return fmatch
 
     def getPlayersPerRegion(self, region):
         players = []

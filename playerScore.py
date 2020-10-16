@@ -91,7 +91,7 @@ class Score:
                         #print(feat, featScore, feats[feat], self.featureTotals[feat])
 
                 
-                print(partObj.participantId, champ, role, partObj.features["kills"], partObj.features["deaths"], partObj.features["assists"], "\t",score)
+                print(partObj.participantId, champ, role, partObj.lane, partObj.role, partObj.spell1, partObj.spell2, partObj.features["kills"], partObj.features["deaths"], partObj.features["assists"], "\t",score)
         print()
 
 if __name__ == "__main__":

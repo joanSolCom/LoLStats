@@ -3,9 +3,14 @@ import numpy as np
 from matchAnalyzer import MatchAnalysis
 from scipy.stats import mode
 import json
+from dataHelper import DataHelper
 from pprint import pprint
+from roleDetection import RoleDetection
+import roleml
+from playerScore import Score
 
 acceptedRoles = ["NONE_JUNGLE","SOLO_TOP","DUO_CARRY_BOTTOM","SOLO_MIDDLE","DUO_SUPPORT_BOTTOM"]
+iDH = DataHelper()
 
 class DataScienceOMG:
 
@@ -75,7 +80,41 @@ class DataScienceOMG:
         with open('dataScience.json', 'w') as outfile:
             json.dump(means, outfile, indent=4)
 
+    def error_analysis(self):
+        iR = RoleDetection()
+        fd = open("errorGameIds.txt","r")
+        raw = fd.read()
+        games = raw.split("\n")
+        iM = MongoManager()
+        cnt=0
+        eligible=0
+        gamesToAdd = []
+
+        for gameId in games:
+            fmatch = iM.getFullMatchById(int(gameId))
+            if fmatch:
+                match = fmatch["match"]
+                timeline = fmatch["timeline"]
+                if match["gameDuration"] //60 > 15:
+                    eligible+=1
+                    goldRoles = roleml.predict(match, timeline)
+                    setRoles = set(goldRoles.values())
+                    if len(setRoles) != 5:
+                        cnt+=1
+                        #print("both got it wrong!!!!")
+                        Score(match, timeline)
+                        print("MINE",iR.predict(match))
+                        print("ROLEML", goldRoles)
+                        print()
+                    else:
+                        gamesToAdd.append(gameId)
+        
+        print(gamesToAdd)
+        #print(cnt,"are not eligible of",eligible)
+
+                    
+
+
 if __name__ == "__main__":
     iD = DataScienceOMG()
-    results = iD.meanFeatureValuesPerRoleAndRank()
-    iD.stats(results)
+    iD.error_analysis()

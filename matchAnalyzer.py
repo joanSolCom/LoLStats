@@ -115,6 +115,8 @@ class Participant:
         self.role = participantStats["timeline"]["role"]
         self.lane = participantStats["timeline"]["lane"]
         self.position = self.role + "_" + self.lane
+        self.spell1 = iDH.getSpellInfoById(participantStats["spell1Id"]).name
+        self.spell2 = iDH.getSpellInfoById(participantStats["spell2Id"]).name
 
         self.accountId = participantInfo["player"]["accountId"]
         self.summonerName = participantInfo["player"]["summonerName"]

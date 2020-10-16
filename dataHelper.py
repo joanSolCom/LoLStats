@@ -13,6 +13,7 @@ class DataHelper:
         self.loadChampInfo()
         self.loadItemInfo()
         self.loadConstants()
+        self.loadSpellInfo()
 
     def loadConstants(self):
         self.queueInfo = {}
@@ -30,6 +31,15 @@ class DataHelper:
                 iI = Item(name, dictInfo, self.basePath, self.patch)
                 self.itemsById[str(name)] = iI
 
+    def loadSpellInfo(self):
+        self.spellsById = {}
+        with open(self.dataPath+"summoner.json") as json_file:
+            raw = json.load(json_file)
+            dictSpells = raw["data"] 
+            for key, dictSpell in dictSpells.items():
+                iC = Spell(dictSpell, self.basePath, self.patch)
+                self.spellsById[dictSpell["key"]] = iC
+
     def loadChampInfo(self):
         self.champsById = {}
 
@@ -42,9 +52,21 @@ class DataHelper:
             
     def getChampInfoById(self, idx):
         return self.champsById.get(str(idx))
+
+    def getSpellInfoById(self, idx):
+        return self.spellsById.get(str(idx))
     
     def getItemInfoById(self, idx):
         return self.itemsById.get(str(idx))
+
+class Spell:
+    def __init__(self, dictInfo, pathDT, patch):
+        self.basePath = pathDT
+        self.basePath = pathDT
+        self.patch = patch
+        self.name = dictInfo["name"]
+        self.description = dictInfo["description"]
+        self.imagePath = pathDT + patch + "/img/spell/Summoner"+self.name+".png"
 
 class Item:
     def __init__(self, idx, dictInfo, pathDT, patch):

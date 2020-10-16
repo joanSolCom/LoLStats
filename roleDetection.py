@@ -12,7 +12,7 @@ from pprint import pprint
 class RoleDetection:
 
     def __init__(self):
-        self.loaded_model = pickle.load(open("roleDetector.pkl", 'rb'))
+        self.loaded_model = pickle.load(open("roleDetector_enriched.pkl", 'rb'))
 
     def predict(self, match):
         dictPositions = {}
@@ -66,7 +66,13 @@ class RoleDetection:
 
     def train_model(self):
         iM = MongoManager()
+        fd = open("toAddModel.txt","r")
+        raw = fd.read()
+        keyfullmatches = raw.split("\n")
+
         fullmatches = iM.getAllMatchesAndTimelines(35000)
+        keyfullmatches = iM.getSpecificFullmatches(keyfullmatches)
+        fullmatches.extend(keyfullmatches)
         X = []
         y = []
 
@@ -91,7 +97,6 @@ class RoleDetection:
                         stats = participant["stats"]
                         for i in range(0,7):
                             features["item"+str(i)] = stats["item"+str(i)]
-                        
                         
                         teamMateCount = 1
                         for participant in match["participants"]:
@@ -123,30 +128,29 @@ class RoleDetection:
                         y.append(roleGold)
 
         clf2 = RandomForestClassifier()
-        #clf2.fit(X,y)
-        cv = KFold(n_splits=10)
-        pipeline2 = Pipeline([('estimator', clf2)])
-        scores = cross_val_score(pipeline2, X, y, cv = cv)
-        print("Results",np.mean(scores))
-        #filename = 'roleDetector.pkl'
-        #pickle.dump(clf2, open(filename, 'wb'))
+        clf2.fit(X,y)
+        #cv = KFold(n_splits=10)
+        #pipeline2 = Pipeline([('estimator', clf2)])
+        #scores = cross_val_score(pipeline2, X, y, cv = cv)
+        #print("Results",np.mean(scores))
+        filename = 'roleDetector_enriched.pkl'
+        pickle.dump(clf2, open(filename, 'wb'))
                     
 
 if __name__ == "__main__":
     iR = RoleDetection()
     #iR.train_model()
-    
-
     iMO = MongoManager()
     
     matches = iMO.getMatches()
     wrong = []
 
     for match in matches:
-        positions, probas = iR.predict(match)
-        if len(set(positions.values())) != 5:
-            print(positions, probas)
-            wrong.append(match["gameId"])
+        if match["gameDuration"] // 60 > 15:
+            positions, probas = iR.predict(match)
+            if len(set(positions.values())) != 5:
+                print(match["gameId"])
+                wrong.append(match["gameId"])
     
-    print(wrong)
+    print(len(wrong))
             
