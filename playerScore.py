@@ -4,9 +4,8 @@ from matchAnalyzer import MatchAnalysis
 
 class Score:
     
-    def __init__(self, match, timeline):
+    def __init__(self, match):
         self.match = match
-        self.timeline = timeline
         self.weights = self.loadWeights()
         self.featureTotals = self.getFeatureTotals()
         self.scorePlayers()
@@ -32,7 +31,7 @@ class Score:
 
     def getFeatureTotals(self):
         featureTotals = {}
-        self.iM = MatchAnalysis(self.match, self.timeline)
+        self.iM = MatchAnalysis(self.match)
         for partObj in self.iM.participants:
             partObj.setFeatures()
 
@@ -96,9 +95,7 @@ class Score:
 
 if __name__ == "__main__":
     iMo = MongoManager()
-    fullmatches = iMo.getAllMatchesAndTimelines(150)
-    for fm in fullmatches:    
-        match = fm["match"]
-        timeline = fm["timeline"]
+    matches = iMo.getMatches(150)
+    for match in matches:    
         if match["gameDuration"] // 60 > 15: 
-            iPS = Score(match, timeline)
+            iPS = Score(match)
