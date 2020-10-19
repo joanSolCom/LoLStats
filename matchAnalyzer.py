@@ -2,13 +2,14 @@ import json
 from LoLStats import LolStats
 from LoLStats import DataGatherer
 from dataHelper import DataHelper
-import roleml
+from roleDetection import RoleDetection
 iDH = DataHelper()
 
 class MatchAnalysis:
 
-    def __init__(self, matchObj, timelineObj=None):
+    def __init__(self, matchObj):
         self.matchDict = matchObj
+        iR = RoleDetection()
         self.length = self.matchDict["gameDuration"] #in seconds
         self.date = self.matchDict["gameCreation"]
         self.server = self.matchDict["platformId"]
@@ -18,15 +19,11 @@ class MatchAnalysis:
         self.participants = []
         self.participantsById = {}
         self.winner = None
-        self.realRoles = None
+        self.realRoles = iR.predict(matchObj)
         self.orderedParticipants = []
         self.teamsByIdAndByPosition = {}
 
-        self.roles = None
-        if timelineObj:
-            self.realRoles = roleml.predict(matchObj, timelineObj)
-            if not self.roles:
-                self.roles = set(self.realRoles.values())
+        self.roles = ["bot","supp","mid","jungle","top"]
 
         for team in self.matchDict["teams"]:
             iT = Team(team)
@@ -39,11 +36,10 @@ class MatchAnalysis:
 
         for pStats, pInfo in zip(self.matchDict["participants"], self.matchDict["participantIdentities"]):           
             iP = Participant(pStats, pInfo, self.length)
-            if timelineObj:
-                iP.position = self.realRoles[iP.participantId]
-                #print(iP.position)
-                #print(iP.role + "_" + iP.lane)           
-                self.teamsByIdAndByPosition[iP.teamId][iP.position] = iP
+            iP.position = self.realRoles[iP.participantId]
+            #print(iP.position)
+            #print(iP.role + "_" + iP.lane)           
+            self.teamsByIdAndByPosition[iP.teamId][iP.position] = iP
 
             self.participants.append(iP)
             self.participantsById[iP.participantId] = iP
@@ -63,7 +59,6 @@ class MatchAnalysis:
                     self.globalFeatureNames.append(fn)
                     fv.append(idTeam)
                     for feat in fv:
-                        
                         self.globalFeatureVector.append(feat)
 
         return self.globalFeatureVector
@@ -106,7 +101,7 @@ class Participant:
         
         self.participantStats = participantStats
         self.gameLength = gameLength
-        self.participantId = participantStats["participantId"]
+        self.participantId = str(participantStats["participantId"])
         self.teamId = str(participantStats["teamId"])
         self.champion = iDH.getChampInfoById(participantStats["championId"]).name
         self.championId = participantStats["championId"]
@@ -328,7 +323,8 @@ class Participant:
         return "  ".join([self.summonerName, self.rank, str(self.winrate), self.role,self.lane,self.champion,strWinner])
 
 if __name__ == "__main__":
-    fd = open("rankedGameInfo.json", "r")
-    strJSON = fd.read()
-    fd.close()
-    iM = MatchAnalysis(strJSON)
+    from mongoManager import MongoManager
+    iMO = MongoManager()
+    matches = iMO.getMatches(10)
+    for match in matches:
+        iM = MatchAnalysis(match)

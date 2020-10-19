@@ -14,40 +14,39 @@ class WinCondition:
     def __init__(self):
         self.loaded_model = pickle.load(open("winnerPredictorRF.pkl", 'rb'))
 
-    def predict(self, match, timeline):
-        iM = MatchAnalysis(match, timeline)
+    def predict(self, match):
+        iM = MatchAnalysis(match)
         print("Actually won",iM.winner)
         for partObj in iM.participants:
             partObj.setFeatures()
+
         X_test = [iM.getGlobalFeatures()]
         result = self.loaded_model.predict(X_test)
-        print("prediction",result)
+        print("prediction",int(result[0]))
+        if int(result[0]) != int(iM.winner):
+            print("OMG FAILLLLLL")
+            
         return result
 
     def train_model(self):
         iM = MongoManager()
-        fullMatches = iM.getAllMatchesAndTimelines()
+        matches = iM.getMatches()
         notUsable = 0
         usable = 0
         X = []
         y = []
         stdGlobalFeatureNames = None
 
-        for fm in fullMatches:
-            match = fm["match"]
-            timeline = fm["timeline"]    
+        for match in matches:
             if match["gameDuration"] // 60 > 15:
                 try:
-                    iM = MatchAnalysis(match, timeline)
+                    iM = MatchAnalysis(match)
                     for partObj in iM.participants:
                         partObj.setFeatures()
 
                     gfv = iM.getGlobalFeatures()
                     if len(gfv) != 650:
                         print("Wrong feat length", len(gfv))
-                        #print(iM.globalFeatureNames)
-                        #print(stdGlobalFeatureNames)
-                        #exit()
                         continue
                     else:
                         if not stdGlobalFeatureNames:
@@ -84,7 +83,7 @@ if __name__ == "__main__":
     iW = WinCondition()
     #iW.train_model()
     
-    gameId = 4746401323
     iMO = MongoManager()
-    match, timeline = iMO.getMatchAndTimeline(gameId)
-    iW.predict(match, timeline)
+    matches = iMO.getMatches(100)
+    for match in matches:
+        iW.predict(match)

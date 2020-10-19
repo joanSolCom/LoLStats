@@ -110,9 +110,9 @@ class MongoManager:
             fms.append(fm)
         return fms
 
-    def getMatches(self):
+    def getMatches(self, limit=10000000000000000):
         matches = []
-        for match in self.matches.find():
+        for match in self.matches.find().limit(limit):
             matches.append(match)
 
         return matches
