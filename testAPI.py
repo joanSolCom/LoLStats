@@ -19,20 +19,23 @@ def getMatchHistoryByName(iLol, name):
         
     return encriptedId, matchHistory
 
-apiKey = "RGAPI-a3e85df8-c061-4aaa-bc92-4a809223c190"
-region = "EUW1"
+apiKey = "RGAPI-80205c82-21eb-4475-a24a-7287968bd15c"
+region = "BR1"
 iLol = LolWatcher(api_key=apiKey)
-name="TeslaTronca"
+name="FallouTz"
 me = iLol.summoner.by_name(region, name)
 idAccount = me["id"]
 encriptedId = me["accountId"]
-
-match_obj = iLol.match.matchlist_by_account(region, encriptedId)
-idGame = match_obj["matches"][40]["gameId"]
-
 iDH = DataGatherer()
-match, timeline = iDH.getMatchAndTimeline(region, idGame)
-iS = Score(match, timeline)
+
+matches = iDH.getMatchHistoryByAccountId(encriptedId, region)
+
+for match in matches:
+    idGame = match["gameId"]
+
+    match = iDH.getMatchByGameId(region, idGame)
+    iS = Score(match)
+
 #print(iLol.champion_mastery.scores_by_summoner(region,idAccount))
 
 

@@ -4,23 +4,36 @@ from dataHelper import DataHelper
 from datetime import datetime
 import operator
 from pprint import pprint
+from matchAnalyzer import MatchAnalysis
 
 class LolStats:
 
-    def __init__(self, matchHistoryJSON=None):
-        if not matchHistoryJSON:
-            with open("my_match_history.json") as json_file:
-                self.raw = json.load(json_file)
-        else:
-            self.raw = json.loads(matchHistoryJSON)
-
+    def __init__(self, matchHistory=None):
         self.iD = DataHelper()
+        self.dG = DataGatherer()
+        self.mh, self.accountId = self.dG.getMatchHistoryByName()
+        
+    #one request per game
+    def statsPerRole(self):
+        dictRole = {}
+        for match in self.mh:
+            matchObj = self.dG.getMatchByGameId(match["platformId"], match["gameId"])
+            iM = MatchAnalysis(matchObj)
+            for part in iM.participants:
+                if part.accountId == self.accountId:
+                    role = part.position
+                    if role not in dictRole:
+                        dictRole[role] = 0
+
+                    dictRole[role]+=1
+                    pprint(dictRole)
+        return dictRole
 
     def dateTimeAnalysis(self):
         dictDates = {}
         dictTimes = {}
 
-        for match in self.raw:
+        for match in self.mh:
             matchId = match["gameId"]
             champId = match["champion"]
             champInfo = self.iD.getChampInfoById(champId)
@@ -44,7 +57,7 @@ class LolStats:
 
     def champAnalysis(self):
         dictChamps = {}
-        for match in self.raw:
+        for match in self.mh:
             matchId = match["gameId"]
             champId = match["champion"]
             champInfo = self.iD.getChampInfoById(champId)
@@ -63,7 +76,7 @@ class LolStats:
 
 class DataGatherer:
 
-    def __init__(self, apiKey = "RGAPI-a3e85df8-c061-4aaa-bc92-4a809223c190"):
+    def __init__(self, apiKey = "RGAPI-80205c82-21eb-4475-a24a-7287968bd15c"):
         self.apiKey = apiKey
         self.iLol = LolWatcher(api_key=apiKey)
     
@@ -81,7 +94,6 @@ class DataGatherer:
         return match, timeline
 
     def getMatchTimeline(self, region, gameId):
-        print(region, gameId)
         timeline = self.iLol.match.timeline_by_match(region,gameId)
         timeline["gameId"] = gameId
         return timeline
@@ -137,25 +149,28 @@ class DataGatherer:
         gameInfo = self.iLol.match.by_id(region=region,match_id=gameId)
         return gameInfo
 
-    def getMatchHistoryByName(self, name="TeslaTronca", region="EUW1"):
+    def getMatchHistoryByName(self, name="TeslaTronca", region="EUW1", pageLimit=1000):
         me = self.iLol.summoner.by_name(region, name)
         encriptedId = me["accountId"]
-        return self.getMatchHistoryByAccountId(encriptedId, region)
+        return self.getMatchHistoryByAccountId(encriptedId, region, pageLimit), encriptedId
 
-    def getMatchHistoryByAccountId(self, accountId, region):
+    def getMatchHistoryByAccountId(self, accountId, region, pageLimit=1000):
         match_obj = self.iLol.match.matchlist_by_account(region, accountId,queue=420)
         matchHistory = []
-        while len(match_obj["matches"]) > 0:
+        page = 0
+        while len(match_obj["matches"]) > 0 and page < pageLimit:
             for matchInfo in match_obj["matches"]:
                 matchHistory.append(matchInfo)
 
             endIndex = match_obj["endIndex"]
             match_obj = self.iLol.match.matchlist_by_account(region, accountId, begin_index=endIndex,queue=420)
-        
+            page+=1
+
         return matchHistory
 
     
 if __name__ == "__main__":
     iS = LolStats()
-    #iS.dateTimeAnalysis()
+    iS.dateTimeAnalysis()
     iS.champAnalysis()
+    iS.statsPerRole()

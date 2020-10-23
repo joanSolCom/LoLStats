@@ -1,9 +1,8 @@
 import json
-from LoLStats import LolStats
-from LoLStats import DataGatherer
 from dataHelper import DataHelper
 from roleDetection import RoleDetection
 iDH = DataHelper()
+from datetime import datetime
 
 class MatchAnalysis:
 
@@ -11,9 +10,8 @@ class MatchAnalysis:
         self.matchDict = matchObj
         iR = RoleDetection()
         self.length = self.matchDict["gameDuration"] #in seconds
-        self.date = self.matchDict["gameCreation"]
+        self.date = self.timestampToDate(self.matchDict["gameCreation"])
         self.server = self.matchDict["platformId"]
-        self.dg = DataGatherer()
         self.teams = []
         self.teamsById = {}
         self.participants = []
@@ -44,7 +42,12 @@ class MatchAnalysis:
             self.participants.append(iP)
             self.participantsById[iP.participantId] = iP
             self.teamsById[iP.teamId].addParticipant(iP)
-        
+
+    def timestampToDate(self, timestamp):
+        converted = int(timestamp) / 1000
+        dt_object = datetime.fromtimestamp(converted)
+        return dt_object.strftime("%d/%m/%Y"), dt_object.strftime("%d/%m/%Y, %H:%M:%S"), dt_object.strftime("%H")
+
     def getGlobalFeatures(self):
         self.globalFeatureVector = []
         self.globalFeatureNames = []
@@ -112,7 +115,7 @@ class Participant:
         self.position = self.role + "_" + self.lane
         self.spell1 = iDH.getSpellInfoById(participantStats["spell1Id"]).name
         self.spell2 = iDH.getSpellInfoById(participantStats["spell2Id"]).name
-
+        self.score = None
         self.accountId = participantInfo["player"]["accountId"]
         self.summonerName = participantInfo["player"]["summonerName"]
         self.summonerId = participantInfo["player"]["summonerId"]

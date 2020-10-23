@@ -4,11 +4,11 @@ from matchAnalyzer import MatchAnalysis
 
 class Score:
     
-    def __init__(self, match):
+    def __init__(self, match, verbose=True):
         self.match = match
         self.weights = self.loadWeights()
         self.featureTotals = self.getFeatureTotals()
-        self.scorePlayers()
+        self.scorePlayers(verbose)
     
     def loadWeights(self, path="scoringWeights.tsv"):
         fd = open(path, "r")
@@ -50,10 +50,14 @@ class Score:
 
         return featureTotals
     
-    def scorePlayers(self):
-        print("Winner",self.iM.winner, self.match["gameDuration"]//60, "minutes")
+    def scorePlayers(self, verbose=True):
+        if verbose:
+            print(self.iM.date)
+            print("Winner",self.iM.winner, self.match["gameDuration"]//60, "minutes")
+        
         for team in self.iM.teams:
-            print("TEAM: ", team.teamId)
+            if verbose:
+                print("TEAM: ", team.teamId)
 
             for partObj in team.participants:
                 partObj.setFeatures()
@@ -89,9 +93,24 @@ class Score:
                         score += featScore
                         #print(feat, featScore, feats[feat], self.featureTotals[feat])
 
-                
-                print(partObj.participantId, champ, role, partObj.lane, partObj.role, partObj.spell1, partObj.spell2, partObj.features["kills"], partObj.features["deaths"], partObj.features["assists"], "\t",score)
-        print()
+                partObj.score = score        
+                if verbose:
+                    print(partObj.participantId, partObj.summonerName ,champ, role, partObj.position, partObj.spell1, partObj.spell2, partObj.features["kills"], partObj.features["deaths"], partObj.features["assists"], "\t",score)
+    
+        if verbose:   
+            print()
+    
+    def getScoreOfPlayer(self, summonerId):
+        allScores = []
+        playerScore = None
+        for team in self.iM.teams:
+            for partObj in team.participants:
+                allScores.append(partObj.score)
+                if partObj.summonerId == summonerId:
+                    playerScore = partObj.score
+
+        return playerScore, allScores
+
 
 if __name__ == "__main__":
     iMo = MongoManager()

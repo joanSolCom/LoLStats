@@ -1,0 +1,11 @@
+soulfiend2005	TR1	SILVER	IV	TopPerf	0.6	DomPerf	0.25
+Ragy1	RU	SILVER	I	TopPerf	0.65	DomPerf	0.2
+Sickside Stories	RU	SILVER	I	TopPerf	0.75	DomPerf	0.2
+yutak11	JP1	SILVER	I	TopPerf	0.6	DomPerf	0.25
+ちょれれ	JP1	SILVER	I	TopPerf	0.65	DomPerf	0.25
+how to eat kebab	EUW1	SILVER	I	TopPerf	0.65	DomPerf	0.2
+TL Wîorâ	TR1	SILVER	I	TopPerf	0.6	DomPerf	0.15
+Shadow Solo QQ	TR1	SILVER	I	TopPerf	0.65	DomPerf	0.2
+WTF Jinx	TR1	SILVER	I	TopPerf	0.6	DomPerf	0.2
+gfedgfeszeñiorez	LA1	SILVER	I	TopPerf	0.65	DomPerf	0.15
+HelpMe82	EUN1	SILVER	I	TopPerf	0.7	DomPerf	0.2
